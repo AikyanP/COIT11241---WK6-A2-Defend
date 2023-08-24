@@ -5,9 +5,18 @@ function enableDoH {
     Write-Output "DNS over HTTPS (DoH) enabled. Please reboot your computer."
 }
 
-# Function to test DNS blocking
+# Function to test DNS blocking and display current DNS
 function testDNSBlock {
-    # ... (unchanged)
+    # Get DNS server for the specified network interface (change "Ethernet 3" to your interface name)
+    $interfaceName = "Ethernet 3"
+    $originalDNS = (Get-DnsClientServerAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -eq $interfaceName}).ServerAddresses
+
+    # Output original DNS server
+    Write-Output "Original DNS server for $($interfaceName): $originalDNS"
+
+    # Resolve IP address of malware domain
+    $malwareDomain = "malware.testcategory.com"
+    $malwareIP = [System.Net.Dns]::GetHostAddresses($malwareDomain)[0].IPAddressToString
 
     # Check if malware domain is blocked (IP should be 0.0.0.0)
     if ($malwareIP -eq "0.0.0.0") {
