@@ -1,3 +1,40 @@
+# Function to configure firewall to block outbound connections to TCP port 80 (HTTP)
+function blockHTTP {
+    $ruleName = "BlockOutboundHTTP"
+
+    # Create a new firewall rule to block outbound connections on TCP port 80
+    New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Protocol TCP -LocalPort 80 -Action Block
+    Write-Output "Firewall rule to block outbound HTTP traffic created."
+}
+
+# Function to test if TCP port 80 (HTTP) traffic is blocked
+function testHTTPBlock {
+    $ruleName = "BlockOutboundHTTP"
+
+    # Check if the firewall rule exists and is enabled
+    $rule = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue
+    if ($rule -and $rule.Enabled) {
+        Write-Output "HTTP traffic is blocked."
+    } else {
+        Write-Output "HTTP traffic is not blocked."
+    }
+}
+
+# Function to disable the firewall rule blocking HTTP traffic
+function unblockHTTP {
+    $ruleName = "BlockOutboundHTTP"
+
+    # Disable and remove the firewall rule if it exists
+    $rule = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue
+    if ($rule) {
+        Set-NetFirewallRule -Name $ruleName -Enabled False
+        Remove-NetFirewallRule -Name $ruleName
+        Write-Output "Firewall rule blocking outbound HTTP traffic removed."
+    } else {
+        Write-Output "No firewall rule blocking outbound HTTP traffic found."
+    }
+}
+
 # Function to enable DNS over HTTPS (DoH)
 function enableDoH {
     $regPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters"
@@ -9,7 +46,7 @@ function enableDoH {
 function resetDoH {
 	$interfacename = "Ethernet 3"
 	Set-DnsClientServerAddress -InterfaceAlias $interfaceName -ServerAddresses ("10.0.2.3")
-	
+
 	Write-Output "DNS server for $interfaceName reset to 10.0.2.3."
 }
 
@@ -62,12 +99,21 @@ if ($firstArgument -eq "DoH-test") {
 elseif ($firstArgument -eq "DoH-enable") {
     enableDoH
 }
-elseif ($firstArgument -eq "DoH-reset") {
-	resetDoH
-}
 elseif ($firstArgument -eq "DoHsetupQuad") {
     setupQuadDoH
 }
+elseif ($firstArgument -eq "resetDoH") {
+    resetDoH
+}
+elseif ($firstArgument -eq "blockHTTP") {
+    blockHTTP
+}
+elseif ($firstArgument -eq "testHTTPBlock") {
+    testHTTPBlock
+}
+elseif ($firstArgument -eq "unblockHTTP") {
+    unblockHTTP
+}
 else {
-    Write-Output "Error: Unknown command. Please use 'DoH-test', 'DoH-enable', 'DoH-reset', or 'DoHsetupQuad' as the first argument."
+    Write-Output "Error: Unknown command. Please use 'DoH-test', 'DoH-enable', 'DoHsetupQuad', 'resetDoH', 'blockHTTP', 'testHTTPBlock', or 'unblockHTTP' as the first argument."
 }
