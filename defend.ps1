@@ -5,6 +5,14 @@ function enableDoH {
     Write-Output "DNS over HTTPS (DoH) enabled. Please reboot your computer."
 }
 
+# Function to reset DNS server back to 10.0.2.3
+function resetDoH {
+	$interfacename = "Ethernet 3"
+	Set-DnsClientServerAddress -InterfaceAlias $interfaceName -ServerAddresses ("10.0.2.3")
+	
+	Write-Output "DNS server for $interfaceName reset to 10.0.2.3."
+}
+
 # Function to setup Quad9 DNS over HTTPS (DoH)
 function setupQuadDoH {
     # Change DNS server of Ethernet 3 to 1.1.1.2
@@ -54,9 +62,12 @@ if ($firstArgument -eq "DoH-test") {
 elseif ($firstArgument -eq "DoH-enable") {
     enableDoH
 }
+elseif ($firstArgument -eq "DoH-reset") {
+	resetDoH
+}
 elseif ($firstArgument -eq "DoHsetupQuad") {
     setupQuadDoH
 }
 else {
-    Write-Output "Error: Unknown command. Please use 'DoH-test', 'DoH-enable', or 'DoHsetupQuad' as the first argument."
+    Write-Output "Error: Unknown command. Please use 'DoH-test', 'DoH-enable', 'DoH-reset', or 'DoHsetupQuad' as the first argument."
 }
