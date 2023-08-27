@@ -9,15 +9,16 @@ function testDNSBlock {
 
     # Resolve IP address of malware domain
     $malwareDomain = "malware.testcategory.com"
-    $malwareIP = [System.Net.Dns]::GetHostAddresses($malwareDomain)[0].IPAddressToString
-
-    # Check if malware domain is blocked (IP should be 0.0.0.0)
-    if ($malwareIP -eq "0.0.0.0") {
-        Write-Output "Malware domain is blocked by DNS filtering."
-    } else {
-        Write-Output "Malware domain is not blocked by DNS filtering."
+    try {
+        $malwareIP = [System.Net.Dns]::GetHostAddresses($malwareDomain)[0].IPAddressToString
+        if ($malwareIP -eq "0.0.0.0") {
+            Write-Output "Malware domain is blocked by DNS filtering."
+        } else {
+            Write-Output "Malware domain is not blocked by DNS filtering."
+        }
+    } catch {
+        Write-Output "DNS resolution for $malwareDomain failed. Error: $_"
     }
 }
-
 # Run the testDNSBlock function
 testDNSBlock
